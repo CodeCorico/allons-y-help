@@ -1,0 +1,20 @@
+<section name="shortcuts" class="pl-section help-shortcuts">
+  <header>
+    <h1>{{_('Shortcuts')}}</h1>
+  </header>
+
+  <div class="help-container">
+    <div class="help-content">
+      {{#groups:i}}
+      <div class="help-shortcuts-panel">
+        <h2>{{name}}</h2>
+        <ul>
+          {{#descriptions}}
+          <li><span class="key">{{keysDescription}}</span> {{actionDescription}}</li>
+          {{/descriptions}}
+        </ul>
+      </div>
+      {{/groups}}
+    </div>
+  </div>
+</section>
