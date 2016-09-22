@@ -13,7 +13,9 @@
       descriptions: descriptions[defaultGroup]
     }];
 
-    $.each(descriptions, function(name, descs) {
+    Object.keys(descriptions).forEach(function(name) {
+      var descs = descriptions[name];
+
       if (name == defaultGroup || !descs || !descs.length) {
         return;
       }
