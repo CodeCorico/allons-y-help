@@ -1,16 +1,16 @@
 (function() {
   'use strict';
 
-  window.Ractive.controllerInjection('help-layout', [
-    '$ShortcutsService', '$i18nService', '$Layout', '$HelpService', '$component', '$data', '$done',
-  function helpLayoutController($ShortcutsService, $i18nService, $Layout, $HelpService, $component, $data, $done) {
+  window.Ractive.controllerInjection('web-help-layout', [
+    '$ShortcutsService', '$i18nService', '$Layout', '$WebHelpService', '$component', '$data', '$done',
+  function webHelpLayoutController($ShortcutsService, $i18nService, $Layout, $WebHelpService, $component, $data, $done) {
 
-    var HelpLayout = $component({
+    var WebHelpLayout = $component({
           data: $data
         }),
         _$el = {
-          layout: $(HelpLayout.el),
-          scrolls: $(HelpLayout.el).find('.help-layout > .pl-scrolls')
+          layout: $(WebHelpLayout.el),
+          scrolls: $(WebHelpLayout.el).find('.web-help-layout > .pl-scrolls')
         },
         _scrolls = null;
 
@@ -28,31 +28,31 @@
       }, 1200);
     }
 
-    $HelpService.onSafe('helpLayoutController.teardown', function() {
-      HelpLayout.teardown();
-      HelpLayout = null;
+    $WebHelpService.onSafe('webHelpLayoutController.teardown', function() {
+      WebHelpLayout.teardown();
+      WebHelpLayout = null;
       $Layout.off('rightContextOpened', _rightContextOpened);
       _scrolls = null;
 
       setTimeout(function() {
-        $HelpService.offNamespace('helpLayoutController');
+        $WebHelpService.offNamespace('webHelpLayoutController');
       });
     });
 
-    $HelpService.onSafe('helpLayoutController.updateScrolls', function() {
+    $WebHelpService.onSafe('webHelpLayoutController.updateScrolls', function() {
       _scrolls.update();
     });
 
-    HelpLayout.require().then(function() {
-      _scrolls = HelpLayout.findChild('name', 'pl-scrolls');
+    WebHelpLayout.require().then(function() {
+      _scrolls = WebHelpLayout.findChild('name', 'pl-scrolls');
 
       var $firstSection = null;
 
-      $(HelpLayout.el).find('.pl-section').each(function() {
+      $(WebHelpLayout.el).find('.pl-section').each(function() {
         var $section = $(this),
             $header = $section.find('header'),
-            $container = $section.find('.help-container'),
-            $content = $container.find('.help-content'),
+            $container = $section.find('.web-help-container'),
+            $content = $container.find('.web-help-content'),
             forceOpen = false;
 
         $firstSection = $firstSection || $section;
@@ -61,7 +61,7 @@
           return;
         }
 
-        var $content = $container.find('.help-content');
+        var $content = $container.find('.web-help-content');
 
         $header.click(function() {
           var fromForceOpen = forceOpen;
@@ -103,19 +103,19 @@
         var name = $section.attr('name');
 
         if (name) {
-          HelpLayout.on('open' + name, function() {
+          WebHelpLayout.on('open' + name, function() {
             forceOpen = true;
             $header.click();
           });
         }
       });
 
-      $HelpService.onSafe('helpLayoutController.openSection', function(args) {
-        HelpLayout.fire('open' + args.section);
+      $WebHelpService.onSafe('webHelpLayoutController.openSection', function(args) {
+        WebHelpLayout.fire('open' + args.section);
       });
 
-      if ($HelpService.openSection()) {
-        HelpLayout.fire('open' + $HelpService.openSection());
+      if ($WebHelpService.openSection()) {
+        WebHelpLayout.fire('open' + $WebHelpService.openSection());
       }
 
       $Layout.on('rightContextOpened', _rightContextOpened);

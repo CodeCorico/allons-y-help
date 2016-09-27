@@ -2,21 +2,21 @@
   'use strict';
 
   window.bootstrap([
-    '$HelpService', '$ShortcutsService', '$i18nService', '$Page', '$done',
-  function($HelpService, $ShortcutsService, $i18nService, $Page, $done) {
+    '$WebHelpService', '$ShortcutsService', '$i18nService', '$Page', '$done',
+  function($WebHelpService, $ShortcutsService, $i18nService, $Page, $done) {
 
     var _helpButton = null,
         _helpShortcut = false;
 
-    $Page.rightButtonAdd('help', {
+    $Page.rightButtonAdd('web-help', {
       icon: 'i-question',
-      group: 'group-help',
+      group: 'group-web-help',
       ready: function(button) {
         _helpButton = button;
       },
       beforeGroup: function(context, $group, userBehavior, callback) {
-        context.require('help-layout').then(function() {
-          $HelpService.init({
+        context.require('web-help-layout').then(function() {
+          $WebHelpService.init({
             shortcut: _helpShortcut
           });
 
@@ -27,13 +27,13 @@
       }
     });
 
-    $HelpService.onSafe('page.openHelp', function() {
+    $WebHelpService.onSafe('page.openHelp', function() {
       _helpButton.action();
     });
 
     $ShortcutsService.register(
       null,
-      'help-f1',
+      'web-help-f1',
       'F1',
       $i18nService._('Open the Help context'),
       function(e) {

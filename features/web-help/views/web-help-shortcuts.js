@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  window.Ractive.controllerInjection('help-shortcuts', [
+  window.Ractive.controllerInjection('web-help-shortcuts', [
     '$ShortcutsService', '$component', '$data', '$done',
   function helpShortcutsController($ShortcutsService, $component, $data, $done) {
 

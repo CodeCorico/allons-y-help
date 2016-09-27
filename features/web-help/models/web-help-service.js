@@ -1,9 +1,11 @@
 module.exports = function() {
   'use strict';
 
-  DependencyInjection.service('$HelpService', ['$i18nService', '$AbstractService', function($i18nService, $AbstractService) {
+  DependencyInjection.service('$WebHelpService', [
+    '$i18nService', '$AbstractService',
+  function($i18nService, $AbstractService) {
 
-    return new (function $HelpService() {
+    return new (function $WebHelpService() {
 
       $AbstractService.call(this);
 

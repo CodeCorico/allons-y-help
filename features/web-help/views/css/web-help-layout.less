@@ -1,6 +1,6 @@
 @import "web";
 
-.help-layout {
+.web-help-layout {
   .camera {
     display: none;
     opacity: 0;
@@ -15,7 +15,7 @@
   &.sb-camera-1 {
     display: none;
 
-    .help-layout-container {
+    .web-help-layout-container {
       display: none;
     }
   }
@@ -35,12 +35,12 @@
     opacity: 0;
     .transition(all 0.35s @easeOutQuart);
 
-    .help-layout-container {
+    .web-help-layout-container {
       display: block;
     }
   }
 
-  .help-layout-panels::-webkit-scrollbar-thumb {
+  .web-help-layout-panels::-webkit-scrollbar-thumb {
     background: #769b89;
   }
 
@@ -66,7 +66,7 @@
       }
     }
 
-    .help-container {
+    .web-help-container {
       position: relative;
       height: 0;
       overflow: hidden;
@@ -76,12 +76,12 @@
         height: auto;
         .no-transition();
 
-        .help-content {
+        .web-help-content {
           position: relative;
         }
       }
 
-      .help-content {
+      .web-help-content {
         position: absolute;
         left: 0;
         right: 0;
