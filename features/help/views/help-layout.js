@@ -81,14 +81,6 @@
             });
           }
           else {
-            // $HelpService.updateWinChartCount(
-            //   $section[0].className
-            //     .replace('opened', '')
-            //     .replace('pl-section', '')
-            //     .replace('help-', '')
-            //     .trim() + 'HelpSection'
-            // );
-
             $container.css('height', $content.outerHeight());
 
             setTimeout(function() {

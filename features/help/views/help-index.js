@@ -35,7 +35,7 @@
       null,
       'help-f1',
       'F1',
-      $i18nService._('Open the Help'),
+      $i18nService._('Open the Help context'),
       function(e) {
         // F1
         var isShortcut = e.keyCode == 112 && !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey;
