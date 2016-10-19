@@ -1,6 +1,6 @@
 {
   "files": [
-    "public/web-help/web-help-service.js",
-    "public/web-help/web-help-index.js"
+    "./public/web-help/web-help-service.js",
+    "./public/web-help/web-help-index.js"
   ]
 }
