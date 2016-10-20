@@ -1,20 +1,20 @@
 {
-  "name": "allons-y-help",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "name": "allons-y-web-help",
+  "version": "1.0.0",
+  "description": "Help context.",
+  "license": "MIT",
+  "homepage": "http://allons-y.io",
+  "author": "CodeCorico <hello@codecorico.com>",
+  "bugs": "https://github.com/CodeCorico/allons-y-web-help/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CodeCorico/allons-y-help.git"
+    "url": "https://github.com/CodeCorico/allons-y-web-help.git"
   },
-  "author": "CodeCorico <hello@codecorico.com>",
-  "bugs": {
-    "url": "https://github.com/CodeCorico/allons-y-help/issues"
-  },
-  "homepage": "https://github.com/CodeCorico/allons-y-help",
   "engines": {
     "node": ">=4.1",
     "npm": ">=3.2"
   },
-  "license": "MIT"
+  "dependencies": {
+    "allons-y-web": "^1.0.0"
+  }
 }
