@@ -2,17 +2,32 @@
   'use strict';
 
   window.bootstrap([
-    '$WebHelpService', '$ShortcutsService', '$i18nService', '$Page', '$done',
-  function($WebHelpService, $ShortcutsService, $i18nService, $Page, $done) {
+    '$BodyDataService', '$WebHelpService', '$ShortcutsService', '$i18nService', '$Page', '$done',
+  function($BodyDataService, $WebHelpService, $ShortcutsService, $i18nService, $Page, $done) {
 
     var _helpButton = null,
         _helpShortcut = false;
 
     $Page.rightButtonAdd('web-help', {
-      icon: 'i-question',
+      type: 'indicator',
+      image: '/public/web-help/web-help-button.png',
       group: 'group-web-help',
       ready: function(button) {
         _helpButton = button;
+
+        var helpCookie = window.Cookies.getJSON('web.help') || {},
+            helpChangelog = $BodyDataService.data('web').changelog;
+
+        if (!helpChangelog || !helpChangelog.version) {
+          return;
+        }
+
+        if (
+          !helpCookie || !helpCookie.changelog || !helpCookie.changelog.version ||
+          helpChangelog.version != helpCookie.changelog.version
+        ) {
+          _helpButton.set('notificationsCount', 1);
+        }
       },
       beforeGroup: function(context, $group, userBehavior, callback) {
         context.require('web-help-layout').then(function() {

@@ -10,7 +10,7 @@ module.exports = function() {
       $AbstractService.call(this);
 
       var _this = this,
-          _openSection = null;
+          _changelog = null;
 
       this.openHelp = function(callback) {
         if (_this.isInit()) {
@@ -35,20 +35,27 @@ module.exports = function() {
         }
       };
 
-      this.openSection = function(newValue) {
-        if (typeof newValue != 'undefined') {
-          _this.openHelp(function() {
-            _openSection = newValue;
-
-            _this.fire('openSection', {
-              section: newValue
-            });
-          });
-
-          return _this;
+      this.changelog = function(changelog, version, updatedAt) {
+        if (!changelog) {
+          return _changelog;
         }
 
-        return _openSection;
+        _changelog = {
+          content: changelog,
+          version: version,
+          updatedAt: updatedAt
+        };
+
+        var $BodyDataService = DependencyInjection.injector.service.get('$BodyDataService'),
+            web = $BodyDataService.data(null, 'web') || {};
+
+        web.changelog = {
+          version: version
+        };
+
+        $BodyDataService.data(null, 'web', web);
+
+        return _this;
       };
 
     })();

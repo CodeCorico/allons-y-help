@@ -2,126 +2,146 @@
   'use strict';
 
   window.Ractive.controllerInjection('web-help-layout', [
-    '$ShortcutsService', '$i18nService', '$Layout', '$WebHelpService', '$component', '$data', '$done',
-  function webHelpLayoutController($ShortcutsService, $i18nService, $Layout, $WebHelpService, $component, $data, $done) {
+    '$BodyDataService', '$ShortcutsService', '$WebHelpService', '$Layout', '$socket', '$component', '$data', '$done',
+  function webHelpLayoutController(
+    $BodyDataService, $ShortcutsService, $WebHelpService, $Layout, $socket, $component, $data, $done
+  ) {
 
-    var WebHelpLayout = $component({
-          data: $data
-        }),
-        _$el = {
-          layout: $(WebHelpLayout.el),
-          scrolls: $(WebHelpLayout.el).find('.web-help-layout > .pl-scrolls')
-        },
-        _scrolls = null;
+    var _defaultGroup = $ShortcutsService.defaultGroup(),
+        _descriptions = $ShortcutsService.descriptions();
 
-    function _rightContextOpened(args) {
-      if (!args.opened) {
+    $data.groups = [{
+      name: _defaultGroup,
+      descriptions: _descriptions[_defaultGroup]
+    }];
+
+    Object.keys(_descriptions).forEach(function(name) {
+      var descs = _descriptions[name];
+
+      if (name == _defaultGroup || !descs || !descs.length) {
         return;
       }
 
-      setTimeout(function() {
-        if (!_scrolls) {
-          return;
-        }
+      $data.groups.push({
+        name: name,
+        descriptions: descs
+      });
+    });
 
-        _scrolls.update();
-      }, 1200);
-    }
+    var WebHelpLayout = $component({
+      data: $.extend(true, {
+        newsDate: '31/10/16',
+        opened: false
+      }, $data)
+    });
+
+    $socket.once('read(web-help/changelog)', function(args) {
+      if (!args || !args.changelog) {
+        return;
+      }
+
+      args.changelog.date = window.moment(args.changelog.updatedAt).format('MMMM Do YYYY, hh:mm:ss');
+      args.changelog.dateAgo = window.moment(args.changelog.updatedAt).fromNow();
+
+      WebHelpLayout.set('changelog', args.changelog);
+    });
+
+    $socket.emit('call(web-help/changelog)');
 
     $WebHelpService.onSafe('webHelpLayoutController.teardown', function() {
       WebHelpLayout.teardown();
       WebHelpLayout = null;
-      $Layout.off('rightContextOpened', _rightContextOpened);
-      _scrolls = null;
+      $Layout.rightContext().off('open', _rightContextOpened);
+      $Layout.rightContext().off('close', _rightContextClosed);
 
       setTimeout(function() {
         $WebHelpService.offNamespace('webHelpLayoutController');
       });
     });
 
-    $WebHelpService.onSafe('webHelpLayoutController.updateScrolls', function() {
-      _scrolls.update();
-    });
-
-    WebHelpLayout.require().then(function() {
-      _scrolls = WebHelpLayout.findChild('name', 'pl-scrolls');
-
-      var $firstSection = null;
-
-      $(WebHelpLayout.el).find('.pl-section').each(function() {
-        var $section = $(this),
-            $header = $section.find('header'),
-            $container = $section.find('.web-help-container'),
-            $content = $container.find('.web-help-content'),
-            forceOpen = false;
-
-        $firstSection = $firstSection || $section;
-
-        if (!$header.length || !$container.length || !$content.length) {
-          return;
-        }
-
-        var $content = $container.find('.web-help-content');
-
-        $header.click(function() {
-          var fromForceOpen = forceOpen;
-          forceOpen = false;
-
-          if (!fromForceOpen && $container.hasClass('opened')) {
-            $container
-              .css('height', $content.outerHeight())
-              .removeClass('opened');
-
-            setTimeout(function() {
-              $container.css('height', 0);
-
-              setTimeout(function() {
-                _scrolls.update();
-              }, 350);
-            });
-          }
-          else {
-            $container.css('height', $content.outerHeight());
-
-            setTimeout(function() {
-              $container
-                .addClass('opened')
-                .css('height', '');
-
-              _scrolls.update();
-
-              if (fromForceOpen) {
-                _$el.scrolls.animate({
-                  scrollTop: $section.offset().top - $firstSection.offset().top
-                }, 350);
-
-              }
-            }, 350);
-          }
-        });
-
-        var name = $section.attr('name');
-
-        if (name) {
-          WebHelpLayout.on('open' + name, function() {
-            forceOpen = true;
-            $header.click();
-          });
-        }
-      });
-
-      $WebHelpService.onSafe('webHelpLayoutController.openSection', function(args) {
-        WebHelpLayout.fire('open' + args.section);
-      });
-
-      if ($WebHelpService.openSection()) {
-        WebHelpLayout.fire('open' + $WebHelpService.openSection());
+    function _rightContextOpened() {
+      if (WebHelpLayout.get('opened')) {
+        return;
       }
 
-      $Layout.on('rightContextOpened', _rightContextOpened);
+      var helpCookie = window.Cookies.getJSON('web.help') || {},
+          helpChangelog = $BodyDataService.data('web').changelog;
 
-      $done();
-    });
+      if (!helpChangelog || !helpChangelog.version) {
+        return;
+      }
+
+      if (
+        !helpCookie || !helpCookie.changelog || !helpCookie.changelog.version ||
+        helpChangelog.version != helpCookie.changelog.version
+      ) {
+        window.Cookies.set('web.help', {
+          changelog: {
+            version: helpChangelog.version
+          }
+        }, {
+          expires: 365,
+          path: '/'
+        });
+
+        var GroupedButtons = $Layout.findChild('data-pl-name', 'buttons-right'),
+            buttonsComponents = GroupedButtons.get('buttons');
+
+        for (var j = 0; j < buttonsComponents.length; j++) {
+          if (buttonsComponents[j].pageButtonName == 'web-help') {
+            var buttonComponent = GroupedButtons.findChild('data-index', j);
+
+            buttonComponent.clearNotificationsCount();
+
+            break;
+          }
+        }
+
+        _confetti();
+      }
+    }
+
+    function _rightContextClosed() {
+      _removeConfetti();
+    }
+
+    function _random(a, b) {
+      return Math.floor(Math.random() * (b - a + 1)) + a;
+    }
+
+    function _removeConfetti() {
+      $($Layout.rightContext().el).find('.pl-context-panel').find('.web-help-particle').remove();
+
+      if (WebHelpLayout) {
+        WebHelpLayout.set('confetti', false);
+      }
+    }
+
+    function _confetti() {
+      WebHelpLayout.set('confetti', true);
+
+      var $contextPanel = $($Layout.rightContext().el).find('.pl-context-panel'), //.find('.web-help-news'),
+          confetticount = ($contextPanel.outerWidth() / 50) * 10;
+
+      for (var i = 0; i <= confetticount; i++) {
+        $contextPanel.append([
+          '<span ',
+            'class="web-help-particle c', _random(1, 2), '" ',
+            'style="',
+              'top:', _random(110, 260), 'px; left:', _random(0, 100), '%; width:', _random(6, 8), 'px; ',
+              'height:', _random(3, 4), 'px; animation-delay: ', (_random(0, 30) / 10), 's;',
+            '"',
+          '></span>'
+        ].join(''));
+      }
+
+      setTimeout(_removeConfetti, (1750 + 3000) * 3);
+    }
+
+    $Layout.rightContext().on('open', _rightContextOpened);
+    $Layout.rightContext().on('close', _rightContextClosed);
+
+    WebHelpLayout.require().then($done);
 
   }]);
 

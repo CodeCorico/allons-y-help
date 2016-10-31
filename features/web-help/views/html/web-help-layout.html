@@ -1,4 +1,4 @@
-<section class="web-help-layout {{cameraStoryboard}}">
+<section class="web-help-layout {{confetti ? 'confetti' : ''}}">
 
   <rv-require name="pl-scrolls" src="/public/vendor/plumes/scrolls/pl-scrolls"></rv-require>
 
@@ -6,13 +6,35 @@
 
     {{#inject web-help-before /}}
 
-    <rv-require
-      name="web-help-shortcuts"
-      src="/public/web-help/web-help-shortcuts"
-    ></rv-require>
+    {{#if changelog}}
+      <div class="pl-section web-help-news">
+        <h2>{{_('What\'s new on your platform')}}</h2>
+        <span title="{{changelog.date}}">{{changelog.dateAgo}}</span>
+        <p>{{{changelog.content}}}</p>
+      </div>
+    {{/if}}
+
+    <section class="pl-section">
+      <a class="web-help-link" href="https://allons-y.io/wiki/user-guide" target="_blank">
+        <h2>{{_('User Guide')}}</h2>
+        {{_('Find some guides and tutorials to take control of your available apps and create beautiful contents.')}}
+      </a>
+
+      {{#inject web-help-helps /}}
+    </section>
+
+    <section class="pl-section web-help-shortcuts">
+      <h2>{{_('Shortcuts')}}</h2>
+
+      <ul>
+        {{#groups:i}}
+          {{#descriptions}}
+            <li><span class="web-help-shortcut-key">{{keysDescription}}</span> {{actionDescription}}</li>
+          {{/descriptions}}
+        {{/groups}}
+      </ul>
+    </section>
 
     {{#inject web-help-after /}}
   </div>
-
-  <div class="camera"></div>
 </section>
