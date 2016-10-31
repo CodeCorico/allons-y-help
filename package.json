@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Help context.",
   "license": "MIT",
-  "homepage": "http://allons-y.io",
+  "homepage": "https://allons-y.io",
   "author": "CodeCorico <hello@codecorico.com>",
   "bugs": "https://github.com/CodeCorico/allons-y-web-help/issues",
   "repository": {
@@ -14,7 +14,10 @@
     "node": ">=4.1",
     "npm": ">=3.2"
   },
+  "devDependencies": {
+    "allons-y-dev-chore": "^1.0.0"
+  },
   "dependencies": {
-    "allons-y-web": "^1.0.0"
+    "allons-y-web": "^1.0.2"
   }
 }
