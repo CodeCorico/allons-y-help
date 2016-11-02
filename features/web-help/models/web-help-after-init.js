@@ -30,61 +30,72 @@ module.exports = function($processIndex, $allonsy, $glob, EntityModel, $done) {
         entity.modules = {};
       }
 
-      var files = $allonsy
-          .globPatterns('')
-          .map(function(pattern) {
-            return pattern.split('features/')[0] + 'CHANGELOG_ENDUSER.md';
-          }),
+      var patterns = $allonsy.globPatterns(''),
           newChangelog = [];
 
-      files.forEach(function(file) {
-        if (!fs.existsSync(file)) {
-          return;
-        }
+      patterns.forEach(function(pattern) {
+        $glob.sync(pattern).forEach(function(folder) {
+          var file = folder.split('features/')[0] + 'CHANGELOG_ENDUSER.md',
+              moduleName = file
+                .replace('/CHANGELOG_ENDUSER.md', '')
+                .split('/')
+                .pop()
+                .trim();
 
-        var content = fs.readFileSync(file, 'utf-8').split('\n'),
-            moduleName = null,
-            version = null,
-            text = [];
-
-        for (var i = 0; i < content.length; i++) {
-          var line = content[i];
-
-          if (line.indexOf('# ') === 0) {
-            moduleName = line.replace('# ', '').trim();
+          if (!moduleName || moduleName == '.') {
+            moduleName = 'ROOT';
           }
-          else if (line.indexOf('## ') === 0) {
-            version = version || line.replace('## ', '').trim();
 
-            if (entity.modules[moduleName] && entity.modules[moduleName] == version) {
-              break;
+          if (!entity.modules[moduleName]) {
+            entity.modules[moduleName] = '0.0.0';
+
+            updateNeeded = true;
+          }
+
+          if (!fs.existsSync(file)) {
+            return;
+          }
+
+          var content = fs.readFileSync(file, 'utf-8').split('\n'),
+              version = null,
+              text = [];
+
+          for (var i = 0; i < content.length; i++) {
+            var line = content[i];
+
+            if (line.indexOf('## ') === 0) {
+              version = version || line.replace('## ', '').trim();
+
+              if (entity.modules[moduleName] == version) {
+                break;
+              }
+            }
+            else if (version && line) {
+              text.push(line);
             }
           }
-          else if (version && line) {
-            text.push(line);
+
+          if (text.length) {
+            text = text
+              .join('<br />')
+              .trim()
+              .replace(/\*\*(.*?)\*\*/g, function(string, words) {
+                return '<strong>' + words + '</strong>';
+              })
+              .replace(/_(.*?)_/g, function(string, words) {
+                return '<span class="italic">' + words + '</span>';
+              })
+              .replace(/\[(.*?)\]\((.*?)\)/g, function(string, words, link) {
+                return '<a href="' + link + '" target="_blank">' + words + '</a>';
+              });
+
+            if (entity.modules[moduleName]) {
+              newChangelog.push(text);
+            }
+
+            entity.modules[moduleName] = version;
           }
-        }
-
-        if (text.length) {
-          text = text
-            .join('<br />')
-            .trim()
-            .replace(/\*\*(.*?)\*\*/g, function(string, words) {
-              return '<strong>' + words + '</strong>';
-            })
-            .replace(/_(.*?)_/g, function(string, words) {
-              return '<span class="italic">' + words + '</span>';
-            })
-            .replace(/\[(.*?)\]\((.*?)\)/g, function(string, words, link) {
-              return '<a href="' + link + '" target="_blank">' + words + '</a>';
-            });
-
-          if (entity.modules[moduleName]) {
-            newChangelog.push(text);
-          }
-
-          entity.modules[moduleName] = version;
-        }
+        });
       });
 
       if (!newChangelog.length && !updateNeeded) {
@@ -94,7 +105,7 @@ module.exports = function($processIndex, $allonsy, $glob, EntityModel, $done) {
       }
 
       entity.updatedAt = new Date();
-      entity.changelog = newChangelog.join('<br />');
+      entity.changelog = newChangelog.length ? newChangelog.join('<br />') : entity.changelog;
       entity.version++;
 
       $WebHelpService.changelog(entity.changelog, entity.version, entity.updatedAt);
