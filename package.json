@@ -1,6 +1,6 @@
 {
   "name": "allons-y-web-help",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Help context.",
   "license": "MIT",
   "homepage": "https://allons-y.io",
@@ -18,6 +18,6 @@
     "allons-y-dev-chore": "^1.0.0"
   },
   "dependencies": {
-    "allons-y-web": "^1.0.2"
+    "allons-y-web": "^1.0.3"
   }
 }
