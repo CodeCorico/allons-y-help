@@ -58,6 +58,10 @@ module.exports = function() {
         return _this;
       };
 
+      this.changelogVersion = function() {
+        return _changelog && _changelog.version || null;
+      };
+
     })();
 
   }]);

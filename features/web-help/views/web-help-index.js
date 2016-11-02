@@ -2,11 +2,12 @@
   'use strict';
 
   window.bootstrap([
-    '$BodyDataService', '$WebHelpService', '$ShortcutsService', '$i18nService', '$Page', '$done',
-  function($BodyDataService, $WebHelpService, $ShortcutsService, $i18nService, $Page, $done) {
+    '$socket', '$WebHelpService', '$ShortcutsService', '$i18nService', '$Page', '$done',
+  function($socket, $WebHelpService, $ShortcutsService, $i18nService, $Page, $done) {
 
     var _helpButton = null,
-        _helpShortcut = false;
+        _helpShortcut = false,
+        _helpChangelog = $.extend(true, {}, $Page.get('web').changelog || {});
 
     $Page.rightButtonAdd('web-help', {
       type: 'indicator',
@@ -15,21 +16,22 @@
       ready: function(button) {
         _helpButton = button;
 
-        var helpCookie = window.Cookies.getJSON('web.help') || {},
-            helpChangelog = $BodyDataService.data('web').changelog;
+        var helpCookie = window.Cookies.getJSON('web.help') || {};
 
-        if (!helpChangelog || !helpChangelog.version) {
+        if (!_helpChangelog.version) {
           return;
         }
 
         if (
           !helpCookie || !helpCookie.changelog || !helpCookie.changelog.version ||
-          helpChangelog.version != helpCookie.changelog.version
+          _helpChangelog.version != helpCookie.changelog.version
         ) {
           _helpButton.set('notificationsCount', 1);
         }
       },
       beforeGroup: function(context, $group, userBehavior, callback) {
+        _helpButton.clearNotificationsCount();
+
         context.require('web-help-layout').then(function() {
           $WebHelpService.init({
             shortcut: _helpShortcut
@@ -67,6 +69,27 @@
         _helpButton.action(true);
       }
     );
+
+    if (_helpChangelog.version) {
+      $socket.on('reconnect', function() {
+        if ($WebHelpService.isInit()) {
+          return;
+        }
+
+        $socket.once('read(web-help/changelog.version)', function(args) {
+          if (!args || !args.version) {
+            return;
+          }
+
+          if (args.version != _helpChangelog.version) {
+            _helpChangelog.version = args.version;
+            _helpButton.pushNotification($i18nService._('Your platform has been updated!'));
+          }
+        });
+
+        $socket.emit('call(web-help/changelog.version)');
+      });
+    }
 
     $done();
   }]);

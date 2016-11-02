@@ -2,13 +2,14 @@
   'use strict';
 
   window.Ractive.controllerInjection('web-help-layout', [
-    '$BodyDataService', '$ShortcutsService', '$WebHelpService', '$Layout', '$socket', '$component', '$data', '$done',
+    '$Page', '$BodyDataService', '$ShortcutsService', '$WebHelpService', '$Layout', '$socket', '$component', '$data', '$done',
   function webHelpLayoutController(
-    $BodyDataService, $ShortcutsService, $WebHelpService, $Layout, $socket, $component, $data, $done
+    $Page, $BodyDataService, $ShortcutsService, $WebHelpService, $Layout, $socket, $component, $data, $done
   ) {
 
     var _defaultGroup = $ShortcutsService.defaultGroup(),
-        _descriptions = $ShortcutsService.descriptions();
+        _descriptions = $ShortcutsService.descriptions(),
+        _helpChangelog = $.extend(true, {}, $Page.get('web').changelog || {});
 
     $data.groups = [{
       name: _defaultGroup,
@@ -30,12 +31,16 @@
 
     var WebHelpLayout = $component({
       data: $.extend(true, {
-        newsDate: '31/10/16',
-        opened: false
+        opened: false,
+        user: $BodyDataService.data('web')
       }, $data)
     });
 
-    $socket.once('read(web-help/changelog)', function(args) {
+    function _callChangelog() {
+      $socket.emit('call(web-help/changelog)');
+    }
+
+    $socket.on('read(web-help/changelog)', function(args) {
       if (!args || !args.changelog) {
         return;
       }
@@ -44,9 +49,21 @@
       args.changelog.dateAgo = window.moment(args.changelog.updatedAt).fromNow();
 
       WebHelpLayout.set('changelog', args.changelog);
+
+      if (_helpChangelog.version && args.changelog.version != _helpChangelog.version) {
+        _helpChangelog.version = args.changelog.version;
+
+        WebHelpLayout.set('needRefresh', true);
+
+        _confetti(_helpChangelog.version);
+      }
     });
 
-    $socket.emit('call(web-help/changelog)');
+    $socket.on('reconnect', function() {
+      _callChangelog();
+    });
+
+    _callChangelog();
 
     $WebHelpService.onSafe('webHelpLayoutController.teardown', function() {
       WebHelpLayout.teardown();
@@ -64,40 +81,17 @@
         return;
       }
 
-      var helpCookie = window.Cookies.getJSON('web.help') || {},
-          helpChangelog = $BodyDataService.data('web').changelog;
+      var helpCookie = window.Cookies.getJSON('web.help') || {};
 
-      if (!helpChangelog || !helpChangelog.version) {
+      if (!_helpChangelog.version) {
         return;
       }
 
       if (
         !helpCookie || !helpCookie.changelog || !helpCookie.changelog.version ||
-        helpChangelog.version != helpCookie.changelog.version
+        _helpChangelog.version != helpCookie.changelog.version
       ) {
-        window.Cookies.set('web.help', {
-          changelog: {
-            version: helpChangelog.version
-          }
-        }, {
-          expires: 365,
-          path: '/'
-        });
-
-        var GroupedButtons = $Layout.findChild('data-pl-name', 'buttons-right'),
-            buttonsComponents = GroupedButtons.get('buttons');
-
-        for (var j = 0; j < buttonsComponents.length; j++) {
-          if (buttonsComponents[j].pageButtonName == 'web-help') {
-            var buttonComponent = GroupedButtons.findChild('data-index', j);
-
-            buttonComponent.clearNotificationsCount();
-
-            break;
-          }
-        }
-
-        _confetti();
+        _confetti(_helpChangelog.version);
       }
     }
 
@@ -117,7 +111,16 @@
       }
     }
 
-    function _confetti() {
+    function _confetti(version) {
+      window.Cookies.set('web.help', {
+        changelog: {
+          version: version
+        }
+      }, {
+        expires: 365,
+        path: '/'
+      });
+
       WebHelpLayout.set('confetti', true);
 
       var $contextPanel = $($Layout.rightContext().el).find('.pl-context-panel'), //.find('.web-help-news'),
