@@ -6,16 +6,16 @@
 
     {{#inject web-help-before /}}
 
-    {{#if changelog}}
-      <div class="pl-section web-help-changelog">
+    <div class="pl-section web-help-changelog">
+      {{#if changelog}}
         <h2>{{_('What\'s new on your platform')}}</h2>
         <span title="{{changelog.date}}">{{changelog.dateAgo}}</span>
         <p>{{{changelog.content}}}</p>
         {{#if needRefresh}}
           <p class="web-help-warning-refresh">{{_('Please refresh your page to enjoy these changes.')}}</p>
         {{/if}}
-      </div>
-    {{/if}}
+      {{/if}}
+    </div>
 
     <section class="pl-section">
       <a class="web-help-link" href="https://allons-y.io/wiki/user-guide" target="_blank">

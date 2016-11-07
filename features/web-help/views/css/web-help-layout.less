@@ -114,16 +114,22 @@
     &.web-help-changelog {
       position: relative;
       background-color: #009688;
-      padding: 2rem;
+      padding: 0;
       .transform-origin(top center);
+
+      :last-child {
+        padding-bottom: 2rem;
+      }
 
       h2 {
         margin: 0;
+        padding: 2rem 2rem 0;
       }
 
       > span {
         display: block;
         margin: 0 0 1rem;
+        padding: 0 2rem;
         font-size: 1.2rem;
         color: rgba(255, 255, 255, 0.75);
       }
@@ -139,6 +145,7 @@
 
       p {
         margin: 0;
+        padding: 0 2rem;
       }
 
       .web-help-warning-refresh {
