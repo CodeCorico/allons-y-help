@@ -1,3 +1,9 @@
+<a name="1.0.4"></a>
+# [1.0.4](https://github.com/CodeCorico/allons-y-web-help/compare/1.0.3...1.0.4) (2016-11-29)
+
+### Bug Fixes
+* **web help layout:** refresh page warning margin [#b989156](https://github.com/CodeCorico/allons-y-web-help/commit/b989156)
+
 <a name="1.0.3"></a>
 # [1.0.3](https://github.com/CodeCorico/allons-y-web-help/compare/1.0.2...1.0.3) (2016-11-07)
 
