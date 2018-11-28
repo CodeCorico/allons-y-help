@@ -18,6 +18,12 @@
     "allons-y-dev-chore": "^1.0.0"
   },
   "dependencies": {
-    "allons-y-web": "^1.0.3"
-  }
+    "allons-y-web": "^1.0.3",
+    "snyk": "^1.110.2"
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
+  },
+  "snyk": true
 }
